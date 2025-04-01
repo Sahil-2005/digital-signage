@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Analysis - Digital Signage Analytics</title>
+    <!-- Link to the common CSS file -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<style>
+    .mt-4 {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    #videoCharts {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .chart-container {
+        max-width: 300px;
+        margin: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    
+</style>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/dashboard">Digital Signage Analytics</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/upload">Upload Video</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/analysis2">Video Analysis</a>
+            </li>
+            <li>
+                <a href="/logout"><button class="btn btn-danger delete-btn">Logout</button></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <h2 class="mt-4">Video Analysis</h2>
+    <ul id="videoAnalysisList" class="list-group"></ul>
+    <div id="averageViewCount" class="mt-4">
+        <h4 class="mb-4">Average View Count</h4>
+        <p id="averageCount" class="h5">Loading...</p>
+    </div>
+
+
+    <div class="mt-4" id="videoCharts">
+        <div class="chart-container">
+            <h4>Pie Chart</h4>
+            <canvas id="videoPieChart" width="300" height="300"></canvas>
+        </div>
+        <div class="chart-container">
+            <h4>Bar Chart</h4>
+            <canvas id="videoBarChart" width="300" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<!-- JavaScript and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Dummy video analysis data (Replace this with your actual video analysis data
+
+    async function fetchVideoData() {
+        try {
+            const response = await fetch('http://localhost:3000/videoData');
+            const videoData = await response.json();
+            return videoData.default;
+        } catch (error) {
+            console.error('Error fetching video data:', error);
+            return null;
+        }
+    }
+
+    async function fetchVideoSummaryData() {
+        try {
+            const response = await fetch('http://localhost:4000/videoDataSummary');
+            const videoSummaryData = await response.json();
+            return videoSummaryData;
+        } catch (error) {
+            console.error('Error fetching video summary data:', error);
+            return null;
+        }
+    }
+
+    async function updateVideoAnalysisList() {
+        const videoAnalysisList = document.getElementById('videoAnalysisList');
+
+        const currentUserEmail = "<%= currentUserEmail %>";
+
+        // Fetch video summary data and video data from the server
+        const [videoSummaryData, videoData] = await Promise.all([
+            fetchVideoSummaryData(),
+            fetchVideoData()
+        ]);
+
+        if (videoSummaryData && videoData) {
+            // Filter video data based on the current user's email
+            const currentUserVideos = videoData.filter(video => video.uploadedBy === currentUserEmail);
+
+            //console.log(currentUserVideos)
+            //console.log(videoSummaryData)
+            // Clear the existing list
+            videoAnalysisList.innerHTML = '';
+
+            // Iterate through filtered video data and update the list
+            currentUserVideos.forEach(userVideo => {
+                // Find the corresponding video summary data
+                //console.log(userVideo.name);
+                let count = 0;
+
+                videoSummaryData.forEach(videoDetail => {
+                    const videoList = videoDetail.video_name;
+                    // Check if "short4.mp4" is in the video_name array
+                    if (videoList.includes(userVideo.name + ".mp4")) {
+                        count++;
+                    }
+                });
+                    //if (videoDetail.video_id == userVideo.id) {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        listItem.innerHTML = `
+                            <div>
+                                <h5>${userVideo.name}</h5>
+                                <p>Viewer Count: ${count}</p>
+                            </div>
+                            <span class="badge badge-primary badge-pill">${count} views</span>`;
+                        videoAnalysisList.appendChild(listItem);
+                        //console.log(userVideo.name + " is uploaded");
+                    //}
+                });
+        }
+    }
+
+
+    // Function to calculate and display the average view count for current user's videos
+    async function calculateAverageViewCount() {
+        const averageCountElement = document.getElementById('averageCount');
+        const videoAnalysisList = document.getElementById('videoAnalysisList');
+    
+        // Count the number of videos and calculate total views
+        let videoCount = 0;
+        let totalViews = 0;
+    
+        // Iterate through list items and extract view counts
+        videoAnalysisList.querySelectorAll('.badge').forEach(badge => {
+            const count = parseInt(badge.textContent, 10);
+            
+            if (!isNaN(count)) {
+                videoCount++;
+                totalViews += count;
+            }
+        });
+    
+        // Calculate average view count
+        if (videoCount > 0) {
+            const averageCount = totalViews / videoCount;
+            averageCountElement.textContent = `Average View Count: ${averageCount.toFixed(2)} views`;
+        } else {
+            averageCountElement.textContent = 'Average View Count: No videos available';
+        }
+    }
+    
+    
+
+    
+
+    // Initial update when the page loads
+    updateVideoAnalysisList();
+    calculateAverageViewCount();
+
+    // Periodically update the video analysis list (adjust the interval as needed)
+    setInterval(() => {
+        updateVideoAnalysisList();
+        calculateAverageViewCount();
+    }, 2000);
+
+
+
+    async function updatePieChart() {
+        const videoAnalysisList = document.getElementById('videoAnalysisList');
+
+        // Extract video names and view counts from list items
+        const data = [];
+        videoAnalysisList.querySelectorAll('.list-group-item').forEach(item => {
+            const videoName = item.querySelector('h5').textContent.trim();
+            const viewCount = parseInt(item.querySelector('.badge').textContent, 10);
+
+            data.push({
+                label: videoName,
+                data: viewCount,
+            });
+        });
+
+        // Get the canvas element and initialize the pie chart
+        const canvas = document.getElementById('videoPieChart');
+        const ctx = canvas.getContext('2d');
+
+        // Update or create the pie chart
+        if (window.myPieChart) {
+            // If the chart already exists, update its data
+            window.myPieChart.data.datasets[0].data = data.map(item => item.data);
+            window.myPieChart.data.labels = data.map(item => item.label);
+            window.myPieChart.update();
+        } else {
+            // If the chart doesn't exist, create a new pie chart with tooltip options
+            window.myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: data.map(item => item.data),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            // Add more colors as needed
+                        ],
+                    }],
+                    labels: data.map(item => item.label),
+                },
+            options: {
+                tooltips: {
+                    callbacks: {
+                        label: (tooltipItem, data) => {
+                            const dataset = data.datasets[tooltipItem.datasetIndex];
+                            const currentValue = dataset.data[tooltipItem.index];
+                            const label = data.labels[tooltipItem.index];
+                            return `${label}: ${currentValue} views`;
+                        },
+                    },
+                },
+            },
+        });
+    }}
+
+
+    async function updateBarChart() {
+        const videoAnalysisList = document.getElementById('videoAnalysisList');
+
+        // Extract video names and view counts from list items
+        const data = [];
+        videoAnalysisList.querySelectorAll('.list-group-item').forEach(item => {
+            const videoName = item.querySelector('h5').textContent.trim();
+            const viewCount = parseInt(item.querySelector('.badge').textContent, 10);
+
+            data.push({
+                label: videoName,
+                data: viewCount,
+            });
+        });
+
+        // Get the canvas element and initialize the bar chart
+        const canvas = document.getElementById('videoBarChart');
+        const ctx = canvas.getContext('2d');
+
+        // Update or create the bar chart
+        if (window.myBarChart) {
+            // If the chart already exists, update its data
+            window.myBarChart.data.datasets[0].data = data.map(item => item.data);
+            window.myBarChart.data.labels = data.map(item => item.label);
+            window.myBarChart.update();
+        } else {
+            // If the chart doesn't exist, create a new bar chart
+            window.myBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    datasets: [{
+                        data: data.map(item => item.data),
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        label: 'Views',
+                    }],
+                    labels: data.map(item => item.label),
+                },
+            });
+        }
+    }
+
+
+    // Initial update when the page loads
+    updatePieChart();
+    updateBarChart();
+
+    // Periodically update the pie chart (adjust the interval as needed)
+    setInterval(() => {
+        updatePieChart();
+        updateBarChart();
+    }, 2000);
+</script>
+
+</body>
+</html>

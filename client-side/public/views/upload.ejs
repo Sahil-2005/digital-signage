@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - Digital Signage Analytics</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/7.14.3/video.js"></script>
+
+
+</head>
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/dashboard">Digital Signage System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/upload">Upload Video</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/analysis2">Video Analysis</a>
+            </li>
+            <li>
+                <a href="/logout"><button class="btn btn-danger delete-btn">Logout</button></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<div class="container">
+    <h2>Upload Video</h2>
+    <div class="upload-form">
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="videoTitle">Video Title</label>
+                <input type="text" class="form-control" id="videoTitle" name="videoTitle" placeholder="Enter video title" required>
+            </div>
+            <div class="form-group">
+                <label for="videoDescription">Video Description</label>
+                <textarea class="form-control" id="videoDescription" name="videoDescription" rows="3" placeholder="Enter video description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="videoFile">Choose Video File</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept=".mp4" required>
+                    <label class="custom-file-label" for="videoFile">Select video file</label>
+                </div>
+            </div>
+
+            <!-- <div class="form-group mt-4">
+                <label for="videoLocation">Video Location</label>
+                <select class="form-control" id="videoLocation" name="videoLocation" required>
+                    <option value="default">Default Location</option>
+                </select>
+            </div> -->
+
+            <div class="form-group mt-4">
+                <label for="startTime">Start Time</label>
+                <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
+            </div>
+            
+            <div class="form-group mt-4">
+                <label for="endTime">End Time</label>
+                <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
+            </div>
+
+            
+
+            <div class="form-group mt-4">
+                <label>Video Locations</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="locationDefault" name="videoLocations[]" value="default" checked>
+                    <label class="form-check-label" for="locationDefault">Default Location</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="location1" name="videoLocations[]" value="location1">
+                    <label class="form-check-label" for="location1">Location 1</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="location2" name="videoLocations[]" value="location2">
+                    <label class="form-check-label" for="location2">Location 2</label>
+                    <!-- Add more checkboxes based on where the user can play the video -->
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary upload-btn">Upload Video</button>
+        </form>
+    </div>
+</div>
+<script>
+    
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - Digital Signage Analytics</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/7.14.3/video.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="./index.html">Digital Signage System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="./index.html">Dashboard</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="./upload.html">Upload Video</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./analysis.html">Video Analysis</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Upload Video</h2>
+    <div class="upload-form">
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="videoTitle">Video Title</label>
+                <input type="text" class="form-control" id="videoTitle" name="videoTitle" placeholder="Enter video title" required>
+            </div>
+            <div class="form-group">
+                <label for="videoDescription">Video Description</label>
+                <textarea class="form-control" id="videoDescription" name="videoDescription" rows="3" placeholder="Enter video description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="videoFile">Choose Video File</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept=".mp4" required>
+                    <label class="custom-file-label" for="videoFile">Select video file</label>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="videoTrim">Video Trimming</label>
+                <video id="videoTrim" class="video-js vjs-default-skin" controls preload="auto" width="640" height="264" data-setup="{}">
+                    <source src="" type="video/mp4"> 
+                </video>
+                <div class="form-row mt-2">
+                    <div class="col">
+                        <label for="startTime">Start Time (seconds)</label>
+                        <input type="number" class="form-control" id="startTime" name="startTime" placeholder="Start time">
+                    </div>
+                    <div class="col">
+                        <label for="endTime">End Time (seconds)</label>
+                        <input type="number" class="form-control" id="endTime" name="endTime" placeholder="End time">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary mt-2" id="trimButton">Trim Video</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary upload-btn mt-3">Upload Video</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="https://vjs.zencdn.net/7.14.3/videojs-contrib-hls.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var player = videojs('videoTrim');
+        player.muted(true);
+
+        document.getElementById('videoFile').addEventListener('change', function (event) {
+            var videoURL = URL.createObjectURL(event.target.files[0]);
+            player.src({
+                src: videoURL,
+                type: 'video/mp4'
+            });
+        });
+
+        document.getElementById('trimButton').addEventListener('click', function () {
+            var startTime = parseFloat(document.getElementById('startTime').value) || 0;
+            var endTime = parseFloat(document.getElementById('endTime').value) || player.duration();
+
+            player.currentTime(startTime);
+            player.play();
+
+            player.on('timeupdate', function () {
+                if (player.currentTime() >= endTime) {
+                    player.pause();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html> -->
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - Digital Signage Analytics</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/7.14.3/video.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="./index.html">Digital Signage System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="./index.html">Dashboard</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="./upload.html">Upload Video</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./analysis.html">Video Analysis</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Upload Video</h2>
+    <div class="upload-form">
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="videoTitle">Video Title</label>
+                <input type="text" class="form-control" id="videoTitle" name="videoTitle" placeholder="Enter video title" required>
+            </div>
+            <div class="form-group">
+                <label for="videoDescription">Video Description</label>
+                <textarea class="form-control" id="videoDescription" name="videoDescription" rows="3" placeholder="Enter video description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="videoFile">Choose Video File</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept=".mp4" required>
+                    <label class="custom-file-label" for="videoFile">Select video file</label>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="videoPreview">Video Preview and Trimming</label>
+                <video id="videoPreview" class="video-js vjs-default-skin" controls preload="auto" width="640" height="264" data-setup="{}">
+                    <source src="" type="video/mp4">
+                </video>
+                <div class="form-row mt-2">
+                    <div class="col">
+                        <label for="trimStartTime">Start Time (seconds)</label>
+                        <input type="number" class="form-control" id="trimStartTime" name="trimStartTime" placeholder="Start time">
+                    </div>
+                    <div class="col">
+                        <label for="trimEndTime">End Time (seconds)</label>
+                        <input type="number" class="form-control" id="trimEndTime" name="trimEndTime" placeholder="End time">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary mt-2" id="previewTrimButton">Preview Trim</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary upload-btn mt-3">Upload Video</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://vjs.zencdn.net/7.14.3/videojs-contrib-hls.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var previewPlayer = videojs('videoPreview');
+        previewPlayer.muted(true);
+
+        document.getElementById('videoFile').addEventListener('change', function (event) {
+            var videoURL = URL.createObjectURL(event.target.files[0]);
+            previewPlayer.src({
+                src: videoURL,
+                type: 'video/mp4'
+            });
+        });
+
+        document.getElementById('previewTrimButton').addEventListener('click', function () {
+            var startTime = parseFloat(document.getElementById('trimStartTime').value) || 0;
+            var endTime = parseFloat(document.getElementById('trimEndTime').value) || previewPlayer.duration();
+
+            previewPlayer.currentTime(startTime);
+            previewPlayer.play();
+
+            previewPlayer.on('timeupdate', function () {
+                if (previewPlayer.currentTime() >= endTime) {
+                    previewPlayer.pause();
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html> -->

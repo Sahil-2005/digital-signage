@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Signage Analytics</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css"> <!-- Assuming style.css is in the public directory -->
+
+
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/dashboard">Digital Signage Sytem</a>
+    <!-- <p>Welcome, <%= user.email %>!</p> -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/upload">Upload Video</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/analysis2">Video Analysis</a>
+            </li>
+            <li>
+                <a href="/logout"><button class="btn btn-danger delete-btn">Logout</button></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <h2>Video Analytics</h2>
+    <div id="videoList" class="row">
+        <% userVideoData.forEach(video => { %>
+            <div class="card video-item">
+                <div class="card-body">
+                    <h5 class="card-title video-title"><%= video.name %></h5>
+                    <video class="video-player" controls>
+                        <source src="<%= video.pathToDownload %>" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p class="card-text"><%= video.description %></p>
+                    <p class="card-text">Video is playing at <%= video.locations %></p>
+                    <button class="btn btn-danger delete-btn" onclick="deleteVideo('<%= video.name + ".mp4" %>')">Delete</button>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+    <div id="analyticsContainer">
+        <h3>Real-time View Count</h3>
+        <p>View Count: <span id="viewCount">Loading...</span></p>
+        <button class="btn btn-primary refresh-btn" onclick="refreshViewCount()">Refresh</button>
+    </div>
+</div>
+
+</div>
+
+
+<!-- JavaScript and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+
+    // Function to fetch video data from the server
+    function fetchVideoData() {
+        return fetch('/videoData')
+            .then(response => response.json())
+            .catch(error => {
+                console.error('Error fetching video data:', error);
+                throw error;
+            });
+    }
+
+
+
+// Example function to delete a video on the client side
+async function deleteVideoOnClient(videoName) {
+    try {
+        const response = await fetch('http://localhost:4000/delete-video', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ videoName }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            console.log(`Video '${videoName}' deleted from the server.`);
+            // Optionally, update the client-side playlist after deletion
+            await updatePlaylistAfterDeletion(videoName);
+        } else {
+            console.error(`Failed to delete video '${videoName}'.`);
+        }
+    } catch (error) {
+        console.error('Error deleting video on the client side:', error);
+    }
+}
+
+
+
+
+
+async function deleteVideo(videoName) {
+    try {
+      const response = await fetch(`http://localhost:3000/delete-client-video/${videoName}`, {
+        method: 'DELETE',
+      });
+
+      const response2 = await fetch('http://localhost:4000/delete-video', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ videoName }),
+    });
+      
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        // If the deletion was successful, redirect to '/index.html'
+        window.location.href = '/dashboard';
+      } else {
+        console.error('Error deleting video:', result.message);
+        // Handle the error or display an error message
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      // Handle the error or display an error message
+    }
+
+    
+}
+  
+  
+  
+  
+  
+  //async function updateVideoList() {
+  //  fetchVideoData()
+  //    .then(videoData => {
+  //      console.log("This is video data" + videoData)
+  //      displayVideos(videoData);
+  //    })
+  //    .catch(error => {
+  //      console.error('Error updating video list:', error);
+  //    });
+  //}
+
+  async function updateVideoList() {
+    try {
+        const videoData = await fetchVideoData();
+        displayVideos(videoData);
+    } catch (error) {
+        console.error('Error updating video list:', error);
+    }
+}
+  
+  // Initial update when the page loads
+  updateVideoList();
+  
+
+
+
+
+async function updateVideoData() {
+    try {
+        // Fetch the current video data from the server
+        const response = await fetch('/videoData');
+        const videoData = await response.json();
+
+        // Get the list of video names from the client data
+        const clientVideoNames = videoData.default.map(video => video.name);
+
+        // Filter out videos that no longer exist in the uploads folder
+        videoData.default = videoData.default.filter(video => {
+            const videoPath = `uploads/${video.name}.mp4`;
+            const videoExists = fs.existsSync(path.join(__dirname, 'public', videoPath));
+
+            return videoExists && clientVideoNames.includes(video.name);
+        });
+
+        // Update the video data on the server
+        const updateResponse = await fetch('http://localhost:3000/update-video-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ default: videoData.default }),
+        });
+
+        if (updateResponse.ok) {
+            // Update the video list on the page
+            updateVideoList();
+        } else {
+            console.error('Error updating video data on the server:', updateResponse.statusText);
+            // Handle the error or display an error message
+        }
+    } catch (error) {
+        console.error('Error updating video data:', error);
+    }
+}
+
+
+
+
+
+// Function to display videos in the list
+//function displayVideos(videoData) {
+//    const videoList = document.getElementById('videoList');
+//    videoList.innerHTML = ''; // Clear existing content
+//
+//    Object.keys(videoData).forEach(clientID => {
+//        videoData[clientID].forEach(video => {
+//            const listItem = document.createElement('li');
+//            listItem.className = 'card video-item';
+//            listItem.setAttribute('data-video-name', video.name); // Set data attribute for identification
+//            listItem.innerHTML = `<div class="card-body">
+//                                    <h5 class="card-title video-title">${video.name}</h5>
+//                                    <video class="video-player" controls>
+//                                      <source src="${video.path}" type="video/mp4">
+//                                      Your browser does not support the video tag.
+//                                    </video>
+//                                    <p class="card-text">${video.description}</p>
+//                                    <p class="card-text">Video is playing at ${video.locations}</p>
+//                                    <button class="btn btn-danger delete-btn" onclick="deleteVideo('${video.name + ".mp4"}')">Delete</button>
+//                                  </div>`;
+//            videoList.appendChild(listItem);
+//        });
+//    });
+//}
+//
+
+// Function to update the video list on the page
+
+
+</script>
+
+</body>
+</html>

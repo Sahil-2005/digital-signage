@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Analysis - Digital Signage Analytics</title>
+    <!-- Link to the common CSS file -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/dashboard">Digital Signage Analytics</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/upload">Upload Video</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/analysis">Video Analysis</a>
+            </li>
+            <li>
+                <a href="/logout"><button class="btn btn-danger delete-btn">Logout</button></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <h2 class="mt-4">Video Analysis</h2>
+    <ul id="videoAnalysisList" class="list-group"></ul>
+    <div id="averageViewCount" class="mt-4">
+        <h4 class="mb-4">Average View Count</h4>
+        <p id="averageCount" class="h5">Loading...</p>
+    </div>
+</div>
+
+<!-- JavaScript and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Dummy video analysis data (Replace this with your actual video analysis data
+
+    async function fetchVideoData() {
+        try {
+            const response = await fetch('http://localhost:3000/videoData');
+            const videoData = await response.json();
+            return videoData.default;
+        } catch (error) {
+            console.error('Error fetching video data:', error);
+            return null;
+        }
+    }
+
+    async function fetchVideoSummaryData() {
+        try {
+            const response = await fetch('http://localhost:4000/videoDataSummary');
+            const videoSummaryData = await response.json();
+            return videoSummaryData;
+        } catch (error) {
+            console.error('Error fetching video summary data:', error);
+            return null;
+        }
+    }
+
+    async function updateVideoAnalysisList() {
+        const videoAnalysisList = document.getElementById('videoAnalysisList');
+
+        const currentUserEmail = "<%= currentUserEmail %>";
+
+        // Fetch video summary data and video data from the server
+        const [videoSummaryData, videoData] = await Promise.all([
+            fetchVideoSummaryData(),
+            fetchVideoData()
+        ]);
+
+        if (videoSummaryData && videoData) {
+            // Filter video data based on the current user's email
+            const currentUserVideos = videoData.filter(video => video.uploadedBy === currentUserEmail);
+
+            // Clear the existing list
+            videoAnalysisList.innerHTML = '';
+
+            // Iterate through filtered video data and update the list
+            currentUserVideos.forEach(userVideo => {
+                // Find the corresponding video summary data
+                //console.log(videoSummaryData);
+
+                //const videoSummary = videoSummaryData.find(summary => summary.video_name === userVideo.name);
+
+                //console.log(videoSummary);
+                
+                videoSummaryData.forEach(videoDetail =>{
+
+                    if(videoDetail.video_name == (userVideo.name+".mp4")){
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        listItem.innerHTML = `
+                            <div>
+                                <h5>${userVideo.name}</h5>
+                                <p>Viewer Count: ${videoDetail.viewer_count}</p>
+                            </div>
+                            <span class="badge badge-primary badge-pill">${videoDetail.viewer_count} views</span>`;
+                        videoAnalysisList.appendChild(listItem);
+                            console.log(userVideo.name+" is uploaded");
+                    }
+                })
+                //console.log(videoSummary);
+
+            });
+        }
+    }
+
+    // Function to calculate and display the average view count
+    //async function calculateAverageViewCount() {
+    //    const averageCountElement = document.getElementById('averageCount');
+//
+    //    // Fetch video summary data from the server
+    //    const videoSummaryData = await fetchVideoSummaryData();
+//
+    //    if (videoSummaryData) {
+    //        // Calculate the total views and average count
+    //        const totalViews = videoSummaryData.reduce((sum, video) => sum + video.viewer_count, 0);
+    //        const averageCount = totalViews / videoSummaryData.length;
+//
+    //        if (!isNaN(averageCount)) {
+    //            averageCountElement.textContent = `Average View Count: ${averageCount.toFixed(2)} views`;
+    //        } else {
+    //            averageCountElement.textContent = 'Average View Count: N/A';
+    //        }
+    //    }
+    //}
+
+
+    // Function to calculate and display the average view count for current user's videos
+    async function calculateAverageViewCount() {
+    const averageCountElement = document.getElementById('averageCount');
+
+    // Fetch video summary data and video data from the server
+    const [videoSummaryData, videoData] = await Promise.all([
+        fetchVideoSummaryData(),
+        fetchVideoData()
+    ]);
+
+    if (videoSummaryData && videoData) {
+        const currentUserEmail = "<%= currentUserEmail %>";
+
+        // Filter video data based on the current user's email
+        const currentUserVideos = videoData.filter(video => video.uploadedBy === currentUserEmail);
+
+        // Filter video summary data for the current user's videos
+        const currentUserSummaryData = videoSummaryData.filter(summary =>
+            currentUserVideos.some(userVideo => summary.video_name === userVideo.name + ".mp4")
+        );
+
+        // Calculate the total views and average count for the current user's videos
+        const totalViews = currentUserSummaryData.reduce((sum, video) => sum + video.viewer_count, 0);
+        const averageCount = totalViews / currentUserSummaryData.length;
+
+        if (!isNaN(averageCount)) {
+            averageCountElement.textContent = `Average View Count: ${averageCount.toFixed(2)} views`;
+        } else {
+            averageCountElement.textContent = 'Average View Count: N/A';
+        }
+    }
+}
+
+    
+
+    // Initial update when the page loads
+    updateVideoAnalysisList();
+    calculateAverageViewCount();
+
+    // Periodically update the video analysis list (adjust the interval as needed)
+    setInterval(() => {
+        updateVideoAnalysisList();
+        calculateAverageViewCount();
+    }, 2000);
+</script>
+
+</body>
+</html>
