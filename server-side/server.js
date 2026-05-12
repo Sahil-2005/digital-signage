@@ -45,7 +45,7 @@ app.get('/videos-list', async (req, res) => {
     const files = fs.readdirSync(videoFolder);
     
     // Make a request to fetch video descriptions from "http://localhost:3000/videodata"
-    const response = await axios.get('http://192.168.88.152:3000/videodata');
+    const response = await axios.get('http://192.168.1.103:3000/videodata');
     const videoData = response.data.default;
 
     // Map the video files and merge with descriptions
@@ -108,11 +108,11 @@ app.get('/current-video-info', (req, res) => {
 
 
 app.get('/download-videos', async (req, res) => {
-  const screenId = "location2";
+  const screenId = "location1";
   const currentDateTime = moment();
 
   try {
-    const response = await axios.get('http://192.168.88.152:3000/videodata');
+    const response = await axios.get('http://192.168.1.103:3000/videodata');
     const videoData = response.data.default;
 
     console.log('Video Data:', videoData); // Log videoData
@@ -137,7 +137,7 @@ app.get('/download-videos', async (req, res) => {
         if (currentDateTime.isAfter(videoEndTime) || currentDateTime.isSameOrAfter(videoEndTime)) {
           // Delete the video and skip download
           
-          const response = await fetch(`http://192.168.88.152:3000/delete-client-video/${filename}`, {
+          const response = await fetch(`http://192.168.1.103:3000/delete-client-video/${filename}`, {
             method: 'DELETE',
           });
           
@@ -445,7 +445,7 @@ function deleteVideo(videoName) {
 
 //Listening the port
 app.listen(port, () => {
-  console.log(`Server is running at http://192.168.88.152:${port}`);
+  console.log(`Server is running at http://192.168.1.103:${port}`);
 });
 
 
